@@ -229,6 +229,9 @@ extension MZDownloadManager: URLSessionDelegate {
     }
     
     func URLSession(_ session: Foundation.URLSession, downloadTask: URLSessionDownloadTask, didFinishDownloadingToURL location: URL) {
+        if let code = (downloadTask.response as? HTTPURLResponse)?.statusCode, code == 404 {
+            return
+        }
         for (index, downloadModel) in downloadingArray.enumerated() {
             if downloadTask.isEqual(downloadModel.task) {
                 let fileName = downloadModel.fileName as NSString
@@ -312,7 +315,12 @@ extension MZDownloadManager: URLSessionDelegate {
                             self.downloadingArray.remove(at: index)
                             
                             if error == nil {
-                                self.delegate?.downloadRequestFinished?(downloadModel, index: index)
+                                if let code = (task.response as? HTTPURLResponse)?.statusCode, code == 404 {
+                                    let error = NSError(domain: "MZDownloadManagerHTTPCode404", code: 404, userInfo: [NSLocalizedDescriptionKey : "Document not found"])
+                                    self.delegate?.downloadRequestDidFailedWithError?(error, downloadModel: downloadModel, index: index)
+                                } else {
+                                    self.delegate?.downloadRequestFinished?(downloadModel, index: index)
+                                }
                             } else {
                                 self.delegate?.downloadRequestCanceled?(downloadModel, index: index)
                             }
