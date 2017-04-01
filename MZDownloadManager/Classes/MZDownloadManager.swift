@@ -246,7 +246,7 @@ extension MZDownloadManager: URLSessionDelegate {
                     debugPrint("directory path = \(destinationPath)")
                     
                     do {
-                        if fileManager.fileExists(atPath: fileURL.absoluteString) {
+                        if fileManager.fileExists(atPath: destinationPath) {
                             try fileManager.removeItem(at: fileURL)
                         }
                         try fileManager.moveItem(at: location, to: fileURL)
