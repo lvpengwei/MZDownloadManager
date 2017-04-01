@@ -246,6 +246,9 @@ extension MZDownloadManager: URLSessionDelegate {
                     debugPrint("directory path = \(destinationPath)")
                     
                     do {
+                        if fileManager.fileExists(atPath: fileURL.absoluteString) {
+                            try fileManager.removeItem(at: fileURL)
+                        }
                         try fileManager.moveItem(at: location, to: fileURL)
                     } catch let error as NSError {
                         debugPrint("Error while moving downloaded file to destination path:\(error)")
