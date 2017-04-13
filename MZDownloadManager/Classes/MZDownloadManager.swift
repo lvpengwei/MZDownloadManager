@@ -183,10 +183,9 @@ extension MZDownloadManager {
 extension MZDownloadManager: URLSessionDelegate {
     
     func URLSession(_ session: Foundation.URLSession, downloadTask: URLSessionDownloadTask, didWriteData bytesWritten: Int64, totalBytesWritten: Int64, totalBytesExpectedToWrite: Int64) {
-        for (index, downloadModel) in self.downloadingArray.enumerated() {
-            if downloadTask.isEqual(downloadModel.task) {
-                DispatchQueue.main.async(execute: { () -> Void in
-                    
+        DispatchQueue.main.async(execute: { () -> Void in
+            for (index, downloadModel) in self.downloadingArray.enumerated() {
+                if downloadTask.isEqual(downloadModel.task) {
                     let receivedBytesCount = Double(downloadTask.countOfBytesReceived)
                     let totalBytesCount = Double(downloadTask.countOfBytesExpectedToReceive)
                     let progress = Float(receivedBytesCount / totalBytesCount)
@@ -222,10 +221,10 @@ extension MZDownloadManager: URLSessionDelegate {
                     self.downloadingArray[index] = downloadModel
                     
                     self.delegate?.downloadRequestDidUpdateProgress(downloadModel, index: index)
-                })
-                break
+                    break
+                }
             }
-        }
+        })
     }
     
     func URLSession(_ session: Foundation.URLSession, downloadTask: URLSessionDownloadTask, didFinishDownloadingToURL location: URL) {
@@ -309,11 +308,11 @@ extension MZDownloadManager: URLSessionDelegate {
                 self.delegate?.downloadRequestDidPopulatedInterruptedTasks(self.downloadingArray)
             })
         } else {
-            for(index, object) in self.downloadingArray.enumerated() {
-                let downloadModel = object
-                if task.isEqual(downloadModel.task) {
-                    if error?.code == NSURLErrorCancelled || error == nil {
-                        DispatchQueue.main.async(execute: { () -> Void in
+            DispatchQueue.main.async(execute: { () -> Void in
+                for(index, object) in self.downloadingArray.enumerated() {
+                    let downloadModel = object
+                    if task.isEqual(downloadModel.task) {
+                        if error?.code == NSURLErrorCancelled || error == nil {
                             
                             self.downloadingArray.remove(at: index)
                             
@@ -327,12 +326,8 @@ extension MZDownloadManager: URLSessionDelegate {
                             } else {
                                 self.delegate?.downloadRequestCanceled?(downloadModel, index: index)
                             }
-                            
-                        })
-                    } else {
-                        let resumeData = error?.userInfo[NSURLSessionDownloadTaskResumeData] as? Data
-                        
-                        DispatchQueue.main.async(execute: { () -> Void in
+                        } else {
+                            let resumeData = error?.userInfo[NSURLSessionDownloadTaskResumeData] as? Data
                             
                             var newTask = task
                             if self.isValidResumeData(resumeData) == true {
@@ -355,11 +350,11 @@ extension MZDownloadManager: URLSessionDelegate {
                                 self.delegate?.downloadRequestDidFailedWithError?(error, downloadModel: downloadModel, index: index)
                             }
                             
-                        })
+                        }
+                        break
                     }
-                    break;
                 }
-            }
+            })
         }
     }
     
