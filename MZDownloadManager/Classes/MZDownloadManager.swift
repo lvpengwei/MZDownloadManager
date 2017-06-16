@@ -68,7 +68,7 @@ open class MZDownloadManager: NSObject {
     open var downloadingArray: [MZDownloadModel] = []
     fileprivate var delegate: MZDownloadManagerDelegate?
     
-    fileprivate var backgroundSessionCompletionHandler: (() -> Void)?
+    open var backgroundSessionCompletionHandler: (() -> Void)?
     
     fileprivate let TaskDescFileNameIndex = 0
     fileprivate let TaskDescFileURLIndex = 1
@@ -80,11 +80,6 @@ open class MZDownloadManager: NSObject {
         self.delegate = delegate
         self.sessionManager = self.backgroundSession(sessionIdentifer)
         self.populateOtherDownloadTasks()
-    }
-    
-    public convenience init(session sessionIdentifer: String, delegate: MZDownloadManagerDelegate, completion: (() -> Void)?) {
-        self.init(session: sessionIdentifer, delegate: delegate)
-        self.backgroundSessionCompletionHandler = completion
     }
     
     fileprivate func backgroundSession(_ sessionIdentifer: String) -> Foundation.URLSession {
@@ -361,6 +356,7 @@ extension MZDownloadManager: URLSessionDelegate {
     public func urlSessionDidFinishEvents(forBackgroundURLSession session: URLSession) {
         
         if let backgroundCompletion = self.backgroundSessionCompletionHandler {
+            self.backgroundSessionCompletionHandler = nil
             DispatchQueue.main.async(execute: {
                 backgroundCompletion()
             })
