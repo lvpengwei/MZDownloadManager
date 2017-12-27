@@ -189,7 +189,7 @@ extension MZDownloadManager: URLSessionDelegate {
                     let timeInterval = taskStartedDate.timeIntervalSinceNow
                     let downloadTime = TimeInterval(-1 * timeInterval)
                     
-                    let speed = Float(totalBytesWritten) / Float(downloadTime)
+                    let speed = max(1, Float(totalBytesWritten) / Float(downloadTime))
                     
                     let remainingContentLength = totalBytesExpectedToWrite - totalBytesWritten
                     
