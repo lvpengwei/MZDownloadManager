@@ -257,10 +257,14 @@ extension MZDownloadManager: URLSessionDelegate {
                     //Otherwise blindly give error Destination folder does not exists
                     
                     if let _ = self.delegate?.downloadRequestDestinationDoestNotExists {
-                        self.delegate?.downloadRequestDestinationDoestNotExists?(downloadModel, index: index, location: location)
+                        DispatchQueue.main.async {
+                            self.delegate?.downloadRequestDestinationDoestNotExists?(downloadModel, index: index, location: location)
+                        }
                     } else {
                         let error = NSError(domain: "FolderDoesNotExist", code: 404, userInfo: [NSLocalizedDescriptionKey : "Destination folder does not exists"])
-                        self.delegate?.downloadRequestDidFailedWithError?(error, downloadModel: downloadModel, index: index)
+                        DispatchQueue.main.async {
+                            self.delegate?.downloadRequestDidFailedWithError?(error, downloadModel: downloadModel, index: index)
+                        }
                     }
                 }
                 
